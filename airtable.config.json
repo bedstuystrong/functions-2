@@ -1,0 +1,23 @@
+{
+  "bases": [
+    {
+      "id": "appy1alZdo13D8l8Y",
+      "key": "finance",
+      "tables": [
+        {
+          "key": "transactions",
+          "name": "Cash Flow",
+          "schema": {
+            "name": "Name",
+            "amount": "Amount",
+            "date": "Date",
+            "platform": "Platform",
+            "notes": "Notes",
+            "direction": "Direction",
+            "labels": "Labels"
+          }
+        }
+      ]
+    }
+  ]
+}
