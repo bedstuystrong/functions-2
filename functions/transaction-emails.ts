@@ -204,7 +204,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
       details.platform = 'Cash App';
       const fromMatches = email.subject.match(/(?:Fwd:\s)?(.+) sent you (\$[\d.,]+)(?: for (.*))?/);
       const toMatches = email.subject.match(/You sent (\$[\d.,]+) to (.*)/);
-      const toAcceptedMatches = email.subject.match(/(?:Fwd: )?(.*) just accepted the (\$[\d.,]+) you sent for (.*)/);
+      const toAcceptedMatches = email.subject.match(/(?:Fwd: )?(.*) just accepted the (\$[\d.,]+) you sent(?: for (.*))/);
 
       if (fromMatches) {
         details.direction = 'In';
