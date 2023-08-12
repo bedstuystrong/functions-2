@@ -240,6 +240,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
 
 const handler: Handler = async (event: HandlerEvent) => {
   const fields = await parseMultipartForm(event);
+  console.log(fields);
   const email = pick(fields, ['to', 'from', 'headers', 'subject', 'text', 'html']) as Email;
   const parsed = await simpleParser(email.headers);
 
