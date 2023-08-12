@@ -1,6 +1,6 @@
 // @ts-nocheck
-import * as Busboy from 'busboy'
-import type { HandlerEvent } from "@netlify/functions";
+import Busboy from 'busboy';
+import type { HandlerEvent } from '@netlify/functions';
 
 // https://www.netlify.com/blog/2021/07/29/how-to-process-multipart-form-data-with-a-netlify-function/
 export default function parseMultipartForm(event: HandlerEvent) {
@@ -9,7 +9,7 @@ export default function parseMultipartForm(event: HandlerEvent) {
     const fields: any = {};
 
     // let's instantiate our busboy instance!
-    const busboy = new Busboy({
+    const busboy = Busboy({
       // it uses request headers
       // to extract the form boundary value (the ----WebKitFormBoundary thing)
       headers: event.headers
