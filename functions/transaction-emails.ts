@@ -282,6 +282,7 @@ const handler: Handler = async (event: HandlerEvent) => {
   }
 
   const details = extractPaymentDetails(paymentPlatform, email);
+  console.log(details);
 
   // @ts-ignore FIXME
   await createFinanceTransaction(Object.assign(details, { date }));
