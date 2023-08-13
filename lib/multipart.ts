@@ -17,20 +17,20 @@ export default function parseMultipartForm(event: HandlerEvent) {
 
     // before parsing anything, we need to set up some handlers.
     // whenever busboy comes across a file ...
-    busboy.on(
-      "file",
-      (fieldname, filestream, filename, transferEncoding, mimeType) => {
-        // ... we take a look at the file's data ...
-        filestream.on("data", (data) => {
-          // ... and write the file's name, type and content into `fields`.
-          fields[fieldname] = {
-            filename,
-            type: mimeType,
-            content: data,
-          };
-        });
-      }
-    );
+    // busboy.on(
+    //   "file",
+    //   (fieldname, filestream, filename, transferEncoding, mimeType) => {
+    //     // ... we take a look at the file's data ...
+    //     filestream.on("data", (data) => {
+    //       // ... and write the file's name, type and content into `fields`.
+    //       fields[fieldname] = {
+    //         filename,
+    //         type: mimeType,
+    //         content: data,
+    //       };
+    //     });
+    //   }
+    // );
 
     // whenever busboy comes across a normal field ...
     busboy.on("field", (fieldName, value) => {
