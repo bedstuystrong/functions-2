@@ -4,7 +4,7 @@ import type { HandlerEvent } from '@netlify/functions';
 
 // https://www.netlify.com/blog/2021/07/29/how-to-process-multipart-form-data-with-a-netlify-function/
 export default function parseMultipartForm(event: HandlerEvent) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     // we'll store all form fields inside of this
     const fields: any = {};
 
@@ -38,11 +38,17 @@ export default function parseMultipartForm(event: HandlerEvent) {
       fields[fieldName] = value;
     });
 
+    busboy.on('close', () => {
+      console.log('busboy close');
+    });
+
     // once busboy is finished, we resolve the promise with the resulted fields.
     busboy.on("finish", () => {
       console.log('busboy finish');
       resolve(fields);
     });
+
+    busboy.on('error', reject);
 
     // now that all handlers are set up, we can finally start processing our request!
     const decodedBody = Buffer.from(event.body, 'base64').toString('ascii');
