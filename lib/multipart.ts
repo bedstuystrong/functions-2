@@ -35,12 +35,12 @@ export default function parseMultipartForm(event: HandlerEvent) {
     // whenever busboy comes across a normal field ...
     busboy.on("field", (fieldName, value) => {
       // ... we write its value into `fields`.
-      console.log(fieldName, value);
       fields[fieldName] = value;
     });
 
     // once busboy is finished, we resolve the promise with the resulted fields.
     busboy.on("finish", () => {
+      console.log('busboy finish');
       resolve(fields);
     });
 
