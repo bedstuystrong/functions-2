@@ -48,7 +48,11 @@ export default function parseMultipartForm(event: HandlerEvent) {
       resolve(fields);
     });
 
-    busboy.on('error', reject);
+    busboy.on('error', (error) => {
+      console.log('busboy error');
+      console.error(error);
+      reject(error);
+    });
 
     // now that all handlers are set up, we can finally start processing our request!
     const decodedBody = Buffer.from(event.body, 'base64').toString('ascii');
