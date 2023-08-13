@@ -5,9 +5,6 @@ import type { HandlerEvent } from '@netlify/functions';
 // https://www.netlify.com/blog/2021/07/29/how-to-process-multipart-form-data-with-a-netlify-function/
 export default function parseMultipartForm(event: HandlerEvent) {
   return new Promise((resolve) => {
-    console.log('headers', event.headers);
-    console.log('multiValueHeaders', event.multiValueHeaders);
-    console.log(event.body);
     // we'll store all form fields inside of this
     const fields: any = {};
 
@@ -48,6 +45,7 @@ export default function parseMultipartForm(event: HandlerEvent) {
     });
 
     // now that all handlers are set up, we can finally start processing our request!
-    busboy.write(event.body);
+    const decodedBody = Buffer.from(event.body, 'base64').toString('ascii');
+    busboy.write(decodedBody);
   });
 }
