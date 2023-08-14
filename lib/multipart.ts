@@ -5,7 +5,6 @@ import type { HandlerEvent } from '@netlify/functions';
 // https://www.netlify.com/blog/2021/07/29/how-to-process-multipart-form-data-with-a-netlify-function/
 export default function parseMultipartForm(event: HandlerEvent) {
   return new Promise((resolve, reject) => {
-    console.log(event.body);
     // we'll store all form fields inside of this
     const fields: any = {};
 
@@ -16,25 +15,8 @@ export default function parseMultipartForm(event: HandlerEvent) {
       headers: event.headers
     });
 
-    // before parsing anything, we need to set up some handlers.
-    // whenever busboy comes across a file ...
-    // busboy.on(
-    //   "file",
-    //   (fieldname, filestream, filename, transferEncoding, mimeType) => {
-    //     // ... we take a look at the file's data ...
-    //     filestream.on("data", (data) => {
-    //       // ... and write the file's name, type and content into `fields`.
-    //       fields[fieldname] = {
-    //         filename,
-    //         type: mimeType,
-    //         content: data,
-    //       };
-    //     });
-    //   }
-    // );
-
     // whenever busboy comes across a normal field ...
-    busboy.on("field", (fieldName, value) => {
+    busboy.on('field', (fieldName, value) => {
       // ... we write its value into `fields`.
       fields[fieldName] = value;
     });
@@ -45,7 +27,7 @@ export default function parseMultipartForm(event: HandlerEvent) {
     });
 
     // once busboy is finished, we resolve the promise with the resulted fields.
-    busboy.on("finish", () => {
+    busboy.on('finish', () => {
       console.log('busboy finish');
       resolve(fields);
     });
@@ -58,6 +40,6 @@ export default function parseMultipartForm(event: HandlerEvent) {
 
     // now that all handlers are set up, we can finally start processing our request!
     const decodedBody = Buffer.from(event.body, 'base64').toString('ascii');
-    busboy.write(decodedBody);
+    busboy.end(decodedBody);
   });
 }
