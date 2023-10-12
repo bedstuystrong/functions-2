@@ -110,6 +110,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
       details.platform = 'Venmo';
       const fromMatches = email.subject.match(/(?:Fwd:\s)?(.+) paid you (\$[\d.,]+)/);
       const toMatches = email.subject.match(/You paid (.+) (\$[\d.,]+)/);
+      const noteMatches = email.html.match(/<!-- note -->\s*<div>\s*<p>(.*)<\/p>/m);
 
       if (fromMatches) {
         details.direction = 'In';
@@ -120,6 +121,11 @@ const extractPaymentDetails = (platform: string, email: Email) => {
         details.name = toMatches[1];
         details.amount = '-' + toMatches[2];
       }
+
+      if (noteMatches) {
+        details.note = noteMatches[1];
+      }
+
       break;
     }
     case 'zelle': {
