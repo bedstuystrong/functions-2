@@ -20,6 +20,7 @@ interface Email {
   subject: string;
   text: string;
   html: string;
+  charsets: any;
 }
 
 interface FinanceTransaction {
@@ -246,8 +247,10 @@ const extractPaymentDetails = (platform: string, email: Email) => {
 
 const handler: Handler = async (event: HandlerEvent) => {
   const fields = await parseMultipartForm(event);
-  const email = pick(fields, ['to', 'from', 'headers', 'subject', 'text', 'html']) as Email;
+  const email = pick(fields, ['to', 'from', 'headers', 'subject', 'text', 'html', 'charsets']) as Email;
   const parsed = await simpleParser(email.headers);
+
+  console.log({ charsets: email.charsets })
 
   const date = parsed.headers.get('date');
   email.to = getFirstEmailAddressFromHeader(parsed.headers.get('to') as AddressObject);
@@ -289,6 +292,7 @@ const handler: Handler = async (event: HandlerEvent) => {
 
   const details = extractPaymentDetails(paymentPlatform, email);
 
+  console.log({ ...details, date })
   // @ts-ignore FIXME
   await createFinanceTransaction(Object.assign(details, { date }));
 
