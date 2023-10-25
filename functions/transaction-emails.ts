@@ -1,4 +1,6 @@
-import type { Handler, HandlerEvent } from '@netlify/functions';
+import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { wrap } from '@netlify/integrations';
+import { type SentryContext, withSentry } from '@netlify/sentry';
 import { simpleParser } from 'mailparser';
 import { type AddressObject, EmailAddress } from 'mailparser';
 import sendgridMail from '@sendgrid/mail';
@@ -8,6 +10,8 @@ import { flow, get, map, first } from 'lodash/fp';
 
 import AirtableBase from 'lib/airtable';
 import parseMultipartForm from 'lib/multipart';
+
+const withIntegrations = wrap(withSentry);
 
 sendgridMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -127,6 +131,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
         details.note = noteMatches[1];
       } else {
         console.log('venmo html', email.html)
+        throw new Error('Missing venmo note');
       }
 
       break;
@@ -247,7 +252,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
   return details;
 };
 
-const handler: Handler = async (event: HandlerEvent) => {
+const handler: Handler = withIntegrations(async (event: HandlerEvent, context: HandlerContext & SentryContext) => {
   const fields = await parseMultipartForm(event);
   const email = pick(fields, ['to', 'from', 'headers', 'subject', 'text', 'html', 'charsets']) as Email;
   const parsed = await simpleParser(email.headers);
@@ -303,6 +308,6 @@ const handler: Handler = async (event: HandlerEvent) => {
     body: 'OK',
   };
 
-};
+});
 
 export { handler };

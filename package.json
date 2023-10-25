@@ -7,7 +7,10 @@
   "license": "MIT",
   "dependencies": {
     "@netlify/functions": "^1.6.0",
+    "@netlify/integrations": "^0.6.0",
+    "@netlify/sentry": "^0.0.8",
     "@sendgrid/mail": "^7.7.0",
+    "@sentry/node": "^7.75.1",
     "airtable": "^0.12.1",
     "busboy": "^1.6.0",
     "lodash": "^4.17.21",
