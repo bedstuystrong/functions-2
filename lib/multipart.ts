@@ -22,13 +22,11 @@ export default function parseMultipartForm(event: HandlerEvent) {
     });
 
     busboy.on('close', () => {
-      console.log('busboy close');
       resolve(fields);
     });
 
     // once busboy is finished, we resolve the promise with the resulted fields.
     busboy.on('finish', () => {
-      console.log('busboy finish');
       resolve(fields);
     });
 
