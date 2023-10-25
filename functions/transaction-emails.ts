@@ -125,6 +125,8 @@ const extractPaymentDetails = (platform: string, email: Email) => {
 
       if (noteMatches) {
         details.note = noteMatches[1];
+      } else {
+        console.log('venmo html', email.html)
       }
 
       break;
