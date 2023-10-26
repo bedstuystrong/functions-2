@@ -20,11 +20,9 @@ const FUND_EMAIL_ADDRESS = 'fund@bedstuystrong.com';
 interface Email {
   to: string;
   from: string;
-  headers: string;
   subject: string;
-  text: string;
   html: string;
-  charsets: any;
+  text: string;
 }
 
 interface FinanceTransaction {
@@ -131,7 +129,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
         details.note = noteMatches[1];
       } else {
         console.log('venmo html', email.html)
-        throw new Error('Missing venmo note');
+        throw new Error('Missing Venmo note');
       }
 
       break;
@@ -253,18 +251,27 @@ const extractPaymentDetails = (platform: string, email: Email) => {
 };
 
 const handler: Handler = withIntegrations(async (event: HandlerEvent, context: HandlerContext & SentryContext) => {
-  const fields = await parseMultipartForm(event);
-  const email = pick(fields, ['to', 'from', 'headers', 'subject', 'text', 'html', 'charsets']) as Email;
-  const parsed = await simpleParser(email.headers);
+  const formData = await parseMultipartForm(event) as Record<string, any>;
+  if (!formData.email) {
+    console.warn('Request missing email', formData);
+    return {
+      statusCode: 200,
+      body: 'OK',
+    };
+  }
 
-  console.log({ charsets: email.charsets })
+  const parsed = await simpleParser(formData.email);
+  const email = {
+    ...pick(formData, ['to', 'from', 'subject']),
+    ...pick(parsed, ['html', 'text']),
+  } as Email;
 
   const date = parsed.headers.get('date');
   email.to = getFirstEmailAddressFromHeader(parsed.headers.get('to') as AddressObject);
 
   if (email.to.split('@')[0] !== 'funds' && email.to !== FUND_EMAIL_ADDRESS) {
     // Log and do nothing
-    console.warn('Received email for user other than funds@', email);
+    console.warn('Received email for user other than funds@', parsed);
     return {
       statusCode: 200,
       body: 'OK',
@@ -277,7 +284,7 @@ const handler: Handler = withIntegrations(async (event: HandlerEvent, context: H
 
   if (!isAutoForwarded && email.from !== FUND_EMAIL_ADDRESS) {
     // Log and do nothing
-    console.warn('Received email from unauthorized forwarder', email);
+    console.warn('Received email from unauthorized forwarder', parsed);
     return {
       statusCode: 200,
       body: 'OK',
@@ -287,7 +294,7 @@ const handler: Handler = withIntegrations(async (event: HandlerEvent, context: H
   const paymentPlatform = detectPaymentPlatform(email, { isAutoForwarded });
   if (!paymentPlatform) {
     // todo error
-    console.error(email);
+    console.error(parsed);
     await sendgridMail.send({
       from: 'finance-script@em9481.mail.bedstuystrong.com',
       to: FUND_EMAIL_ADDRESS,
