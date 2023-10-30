@@ -18,6 +18,33 @@
           }
         }
       ]
+    },
+    {
+      "id": "appeZky1jPvOWIcZY",
+      "key": "raffle",
+      "tables": [
+        {
+          "key": "entrants",
+          "name": "Entrants",
+          "schema": {
+            "number": "Entrant number",
+            "name": "Name",
+            "contact": "Email or phone number",
+            "numberOfEntries": "Number of entries",
+            "entries": "Entries"
+          }
+        },
+        {
+          "key": "entries",
+          "name": "Entries",
+          "schema": {
+            "number": "Entry number",
+            "entrant": "Entrant",
+            "quantity": "Quantity",
+            "prize": "Prize"
+          }
+        }
+      ]
     }
   ]
 }

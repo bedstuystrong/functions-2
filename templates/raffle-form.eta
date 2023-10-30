@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Raffle entry form</title>
+  <link rel="stylesheet" href="https://airtable.com/css/compiled/all.css">
+</head>
+
+<body>
+  <div class="">
+    welcome, <strong><%= it.entrant.name %></strong>.
+    you have <%= it.entrant.numberOfEntries %> raffle entries
+  </div>
+
+  <form>
+    <input type="hidden" name="totalEntries" value="<%= it.entrant.numberOfEntries %>" />
+    <% it.prizes.forEach((prize)=> { %>
+      <div style="display: flex;">
+        <div class="<%= prize.color %>" style="flex: 1;">
+          <%= prize.name %>
+        </div>
+        <input type="number" value="<%= it.entries[prize.id]?.quantity || 0 %>" name="<%= prize.id %>" />
+      </div>
+    <% }) %>
+    <div style="display: flex">
+      <div style="flex: 1; ">Total</div>
+      <div style="flex-basis: 145px">
+        <span id="validationTotal">0</span>/<%= it.entrant.numberOfEntries %>
+      </div>
+    </div>
+    <button type="submit">Submit raffle entries</button>
+  </form>
+
+  <script type="text/javascript">
+    const totalEntries = parseInt(document.querySelector('input[name=totalEntries]').value);
+    const validationTotal = document.getElementById('validationTotal');
+
+    const form = document.querySelector('form');
+    const inputs = document.querySelectorAll('input[type=number]');
+    const sumInputs = () => [...inputs].map(i => parseInt(i.value)).reduce((a, b) => a + b);
+    
+    const onChange = (event) => {
+      const sum = sumInputs();
+      validationTotal.innerText = sum;
+      if (sum > totalEntries) {
+        // TODO
+        validationTotal.style = 'color: red;';
+      }
+    };
+
+    onChange();
+    inputs.forEach((input) => {
+      input.addEventListener('change', onChange);
+    });
+
+  </script>
+</body>
+
+</html>
