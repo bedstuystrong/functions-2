@@ -55,13 +55,26 @@ export default class AirtableBase {
     }
 
     this.client = new Airtable({
-      apiKey: process.env.AIRTABLE_API_KEY,
+      apiKey: Netlify.env.get('AIRTABLE_API_KEY'),
     });
 
     this.config = _.find(config.bases, ['key', baseKey]);
     invariant(this.config, `could not find base with key "${baseKey}" in config`);
 
     this._base = this.client.base(this.config.id);
+  }
+
+  meta = async (): Promise<any> => {
+    const apiBase = `${this.client._endpointUrl}/v${this.client._apiVersionMajor}`;
+    const url = `${apiBase}/meta/bases/${this.config.id}/tables`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${this.client._apiKey}`,
+      },
+    });
+
+    return response.json();
   }
 
   table = (tableKey: string) => {
