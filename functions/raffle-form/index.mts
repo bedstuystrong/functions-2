@@ -25,9 +25,7 @@ export default async (request: Request, context: Context) => {
 
   const entrant = entrantsTable.normalize(await entrantsTable._table.find(entrantId));
 
-  const meta = await raffleBase.meta();
-  console.log({ meta })
-  const prizes = getPrizeOptions(meta);
+  const prizes = getPrizeOptions(await raffleBase.meta());
 
   if (!prizes) {
     return;
