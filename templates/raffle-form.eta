@@ -5,32 +5,85 @@
   <meta charset="utf-8">
   <title>Raffle entry form</title>
   <link rel="stylesheet" href="https://airtable.com/css/compiled/all.css">
+  <style type="text/css">
+    .form {
+    }
+    .form--invalid {
+    
+    }
+    .form--invalid #validationTotal {
+      color: red;
+    }
+
+    .numberField {
+      display: flex;
+    }
+    .numberField input[type=number] {
+      min-width: 6rem;
+      max-width: 8rem;
+      -moz-appearance: textfield;
+    }
+    .numberField button {
+      border: 0;
+      height: 100%;
+    }
+    .numberField input::-webkit-outer-spin-button,
+    .numberField input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="">
-    welcome, <strong><%= it.entrant.name %></strong>.
-    you have <%= it.entrant.numberOfEntries %> raffle entries
-  </div>
+<div class="container sharedForm">
+  <header>
+    <div class="formHeader mx-auto max-width-2 lg-rounded-big md-rounded-big sm-rounded-big white ">
+      <h3 class="line-height-5">Raffle prize selection</h3>
+      <p>hi <strong><%= it.entrant.name %></strong>. you have <%= it.entrant.numberOfEntries %> raffle entries</p>
+    </div>
+  </header>
 
-  <form>
-    <input type="hidden" name="totalEntries" value="<%= it.entrant.numberOfEntries %>" />
-    <% it.prizes.forEach((prize)=> { %>
-      <div style="display: flex;">
-        <div class="<%= prize.color %>" style="flex: 1;">
-          <%= prize.name %>
+  <form class="form formFieldAndSubmitContainer">
+    <div class="formFieldContainer mx-auto my3 max-width-2">
+      <input type="hidden" name="totalEntries" value="<%= it.entrant.numberOfEntries %>" />
+      <% it.prizes.forEach((prize)=> { %>
+        <div style="display: flex;" class="my1">
+          <label style="flex: 1;" for="<%= prize.id %>">
+            <span class="<%= prize.color %> pill px1 inline-block">
+              <%= prize.name %>
+            </span>
+          </label>
+          <div class="numberField baymax">
+            <button type="button" aria-label="decrement" data-input="<%= prize.id %>" class="decrement rounded-left px-half" tabindex="-1">-</button>
+            <input
+              type="number"
+              value="<%= it.entries[prize.id]?.quantity || 0 %>"
+              name="<%= prize.id %>"
+              id="<%= prize.id %>"
+              min="0"
+              max="100"
+              step="1"
+            />
+            <button type="button" aria-label="increment" data-input="<%= prize.id %>" class="increment rounded-right px-half" tabindex="-1">+</button>
+          </div>
         </div>
-        <input type="number" value="<%= it.entries[prize.id]?.quantity || 0 %>" name="<%= prize.id %>" />
-      </div>
-    <% }) %>
-    <div style="display: flex">
-      <div style="flex: 1; ">Total</div>
-      <div style="flex-basis: 145px">
-        <span id="validationTotal">0</span>/<%= it.entrant.numberOfEntries %>
+      <% }) %>
+      <div style="display: flex">
+        <div style="flex: 1; ">Total</div>
+        <div style="flex-basis: 145px">
+          <span id="validationTotal">0</span>/<%= it.entrant.numberOfEntries %>
+        </div>
       </div>
     </div>
-    <button type="submit">Submit raffle entries</button>
+    <div class="formSubmit mx-auto max-width-2 baymax mt3">
+      <button type="submit" class="submitButton blue rounded-big px2 py1 text-white strong huge border-none submit styled-input focus-visible pointer link-quiet">
+        Submit raffle entries
+      </button>
+      <p class="mt2 quieter small">If you have problems email us at fund@bedstuystrong.com</p>
+    </div>
   </form>
+</div>
 
   <script type="text/javascript">
     const totalEntries = parseInt(document.querySelector('input[name=totalEntries]').value);
@@ -40,18 +93,41 @@
     const inputs = document.querySelectorAll('input[type=number]');
     const sumInputs = () => [...inputs].map(i => parseInt(i.value)).reduce((a, b) => a + b);
     
-    const onChange = (event) => {
+    const onQuantityChange = (event) => {
       const sum = sumInputs();
       validationTotal.innerText = sum;
       if (sum > totalEntries) {
         // TODO
-        validationTotal.style = 'color: red;';
+        form.classList.add('form--invalid');
+      } else {
+        form.classList.remove('form--invalid');
       }
     };
 
-    onChange();
+    onQuantityChange();
     inputs.forEach((input) => {
-      input.addEventListener('change', onChange);
+      input.addEventListener('change', onQuantityChange);
+    });
+
+    const increment = (event) => {
+      const input = document.getElementById(event.target.dataset.input);
+      if (!input.max || input.value < parseInt(input.max)) {
+        input.value++;    
+      }
+      onQuantityChange();
+    };
+    const decrement = (event) => {
+      const input = document.getElementById(event.target.dataset.input);
+      if (!input.min || input.value > parseInt(input.min)) {
+        input.value--;
+      }
+      onQuantityChange();
+    };
+    document.querySelectorAll('.numberField .increment').forEach((button) => {
+      button.addEventListener('click', increment);
+    });
+    document.querySelectorAll('.numberField .decrement').forEach((button) => {
+      button.addEventListener('click', decrement);
     });
 
   </script>
