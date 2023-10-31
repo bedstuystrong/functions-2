@@ -19,18 +19,33 @@
       display: flex;
     }
     .numberField input[type=number] {
-      min-width: 6rem;
-      max-width: 8rem;
+      width: 100%;
+      border-radius: 0;
       -moz-appearance: textfield;
-    }
-    .numberField button {
-      border: 0;
-      height: 100%;
+      border-width: 2px;
     }
     .numberField input::-webkit-outer-spin-button,
     .numberField input::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .form-grid-row {
+      display: flex;
+      align-items: center;
+    }
+    .form-grid-row label {
+      flex: 1;
+    }
+    .form-grid-row .form-grid-input-col {
+      min-width: 8rem;
+      max-width: 10rem;
+
     }
   </style>
 </head>
@@ -45,17 +60,17 @@
   </header>
 
   <form class="form formFieldAndSubmitContainer">
-    <div class="formFieldContainer mx-auto my3 max-width-2">
+    <div class="formFieldContainer form-grid mx-auto my3 max-width-2">
       <input type="hidden" name="totalEntries" value="<%= it.entrant.numberOfEntries %>" />
       <% it.prizes.forEach((prize)=> { %>
-        <div style="display: flex;" class="my1">
-          <label style="flex: 1;" for="<%= prize.id %>">
+        <div class="form-grid-row">
+          <label for="<%= prize.id %>">
             <span class="<%= prize.color %> pill px1 inline-block">
               <%= prize.name %>
             </span>
           </label>
-          <div class="numberField baymax">
-            <button type="button" aria-label="decrement" data-input="<%= prize.id %>" class="decrement rounded-left px-half" tabindex="-1">-</button>
+          <div class="numberField baymax form-grid-input-col">
+            <button type="button" aria-label="decrement" data-input="<%= prize.id %>" class="decrement rounded-left pl1 pr-three-quarters darken1 darken2-hover pointer" tabindex="-1">-</button>
             <input
               type="number"
               value="<%= it.entries[prize.id]?.quantity || 0 %>"
@@ -64,15 +79,16 @@
               min="0"
               max="100"
               step="1"
+              class="border-thick border-darken2 border-darken3-hover detailCursor-border-blue border-blue-focus detailCursor-stroked-blue-focus"
             />
-            <button type="button" aria-label="increment" data-input="<%= prize.id %>" class="increment rounded-right px-half" tabindex="-1">+</button>
+            <button type="button" aria-label="increment" data-input="<%= prize.id %>" class="increment rounded-right pr1 pl-three-quarters darken1 darken2-hover pointer" tabindex="-1">+</button>
           </div>
         </div>
       <% }) %>
-      <div style="display: flex">
-        <div style="flex: 1; ">Total</div>
-        <div style="flex-basis: 145px">
-          <span id="validationTotal">0</span>/<%= it.entrant.numberOfEntries %>
+      <div class="form-grid-row mt2">
+        <label for="validationTotal">Total</label>
+        <div style="" class="form-grid-input-col">
+          <span id="validationTotal">?</span>/<%= it.entrant.numberOfEntries %>
         </div>
       </div>
     </div>
