@@ -7,8 +7,8 @@ import AirtableBase from '../../lib/airtable.mjs';
 
 const getPrizeOptions = (meta) => {
   const entriesTable = _.find(meta.tables, ['name', 'Entries']);
-  const prizeField = _.find(entriesTable.fields, ['name', 'Prize'])
-  return prizeField.options.choices;
+  const prizeField = _.find(entriesTable?.fields, ['name', 'Prize'])
+  return prizeField?.options?.choices;
 };
 
 export default async (request: Request, context: Context) => {
@@ -25,7 +25,13 @@ export default async (request: Request, context: Context) => {
 
   const entrant = entrantsTable.normalize(await entrantsTable._table.find(entrantId));
 
-  const prizes = getPrizeOptions(await raffleBase.meta());
+  const meta = await raffleBase.meta();
+  console.log({ meta })
+  const prizes = getPrizeOptions(meta);
+
+  if (!prizes) {
+    return;
+  }
 
   const entries = [];
   if (entrant.entries && entrant.entries.length) {
