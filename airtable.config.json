@@ -43,6 +43,15 @@
             "quantity": "Quantity",
             "prize": "Prize"
           }
+        },
+        {
+          "key": "prizes",
+          "name": "Prizes",
+          "schema": {
+            "name": "Name",
+            "value": "Value",
+            "color": "Color"
+          }
         }
       ]
     }

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Raffle entry form</title>
   <link rel="stylesheet" href="https://airtable.com/css/compiled/all.css">
   <style type="text/css">
@@ -49,7 +49,6 @@
     }
   </style>
 </head>
-
 <body>
 <div class="container sharedForm">
   <header>
@@ -59,14 +58,15 @@
     </div>
   </header>
 
-  <form class="form formFieldAndSubmitContainer">
-    <div class="formFieldContainer form-grid mx-auto my3 max-width-2">
+  <form class="form formFieldAndSubmitContainer" method="POST" action="/raffle-form/submit" data-netlify="false">
+    <div class="formFieldContainer form-grid mx-auto my3 xs-px2 max-width-2">
+      <input type="hidden" name="entrantId" value="<%= it.entrantId %>" />
       <input type="hidden" name="totalEntries" value="<%= it.entrant.numberOfEntries %>" />
       <% it.prizes.forEach((prize)=> { %>
         <div class="form-grid-row">
           <label for="<%= prize.id %>">
             <span class="<%= prize.color %> pill px1 inline-block">
-              <%= prize.name %>
+              <%= prize.name %> (<%= prize.value %>)
             </span>
           </label>
           <div class="numberField baymax form-grid-input-col">
@@ -74,7 +74,7 @@
             <input
               type="number"
               value="<%= it.entries[prize.id]?.quantity || 0 %>"
-              name="<%= prize.id %>"
+              name="prizes[<%= prize.id %>]"
               id="<%= prize.id %>"
               min="0"
               max="100"
@@ -92,7 +92,7 @@
         </div>
       </div>
     </div>
-    <div class="formSubmit mx-auto max-width-2 baymax mt3">
+    <div class="formSubmit mx-auto max-width-2 baymax mt3 xs-px2">
       <button type="submit" class="submitButton blue rounded-big px2 py1 text-white strong huge border-none submit styled-input focus-visible pointer link-quiet">
         Submit raffle entries
       </button>
@@ -101,52 +101,52 @@
   </form>
 </div>
 
-  <script type="text/javascript">
-    const totalEntries = parseInt(document.querySelector('input[name=totalEntries]').value);
-    const validationTotal = document.getElementById('validationTotal');
+<script type="text/javascript">
+  const totalEntries = parseInt(document.querySelector('input[name=totalEntries]').value);
+  const validationTotal = document.getElementById('validationTotal');
 
-    const form = document.querySelector('form');
-    const inputs = document.querySelectorAll('input[type=number]');
-    const sumInputs = () => [...inputs].map(i => parseInt(i.value)).reduce((a, b) => a + b);
-    
-    const onQuantityChange = (event) => {
-      const sum = sumInputs();
-      validationTotal.innerText = sum;
-      if (sum > totalEntries) {
-        // TODO
-        form.classList.add('form--invalid');
-      } else {
-        form.classList.remove('form--invalid');
-      }
-    };
+  const form = document.querySelector('form');
+  const inputs = document.querySelectorAll('input[type=number]');
+  const sumInputs = () => [...inputs].map(i => parseInt(i.value)).reduce((a, b) => a + b);
+  
+  const onQuantityChange = (event) => {
+    const sum = sumInputs();
+    validationTotal.innerText = sum;
+    if (sum > totalEntries) {
+      // TODO
+      form.classList.add('form--invalid');
+    } else {
+      form.classList.remove('form--invalid');
+    }
+  };
 
+  onQuantityChange();
+  inputs.forEach((input) => {
+    input.addEventListener('change', onQuantityChange);
+  });
+
+  const increment = (event) => {
+    const input = document.getElementById(event.target.dataset.input);
+    if (!input.max || input.value < parseInt(input.max)) {
+      input.value++;    
+    }
     onQuantityChange();
-    inputs.forEach((input) => {
-      input.addEventListener('change', onQuantityChange);
-    });
+  };
+  const decrement = (event) => {
+    const input = document.getElementById(event.target.dataset.input);
+    if (!input.min || input.value > parseInt(input.min)) {
+      input.value--;
+    }
+    onQuantityChange();
+  };
+  document.querySelectorAll('.numberField .increment').forEach((button) => {
+    button.addEventListener('click', increment);
+  });
+  document.querySelectorAll('.numberField .decrement').forEach((button) => {
+    button.addEventListener('click', decrement);
+  });
 
-    const increment = (event) => {
-      const input = document.getElementById(event.target.dataset.input);
-      if (!input.max || input.value < parseInt(input.max)) {
-        input.value++;    
-      }
-      onQuantityChange();
-    };
-    const decrement = (event) => {
-      const input = document.getElementById(event.target.dataset.input);
-      if (!input.min || input.value > parseInt(input.min)) {
-        input.value--;
-      }
-      onQuantityChange();
-    };
-    document.querySelectorAll('.numberField .increment').forEach((button) => {
-      button.addEventListener('click', increment);
-    });
-    document.querySelectorAll('.numberField .decrement').forEach((button) => {
-      button.addEventListener('click', decrement);
-    });
-
-  </script>
+</script>
 </body>
 
 </html>

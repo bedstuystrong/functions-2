@@ -3,7 +3,7 @@ import path from 'node:path';
 import { Eta } from 'eta';
 import _ from 'lodash';
 
-import AirtableBase from '../../lib/airtable.mjs';
+import AirtableBase from '../lib/airtable.mjs';
 
 const getPrizeOptions = (meta) => {
   const entriesTable = _.find(meta.tables, ['name', 'Entries']);
@@ -22,10 +22,11 @@ export default async (request: Request, context: Context) => {
   const raffleBase = new AirtableBase('raffle');
   const entrantsTable = raffleBase.table('entrants');
   const entriesTable = raffleBase.table('entries');
+  const prizesTable = raffleBase.table('prizes');
 
   const entrant = entrantsTable.normalize(await entrantsTable._table.find(entrantId));
 
-  const prizes = getPrizeOptions(await raffleBase.meta());
+  const prizes = (await prizesTable._table.select().all()).map(prizesTable.normalize);
 
   if (!prizes) {
     return;
@@ -38,12 +39,13 @@ export default async (request: Request, context: Context) => {
     }
   }
   const entriesCount = Object.fromEntries(entries.map(entry => (
-    [_.find(prizes, ['name', entry.prize]).id, { quantity: entry.quantity, recordId: entry.id }]
+    [entry.prizeId[0], { quantity: entry.quantity, recordId: entry.id }]
   )));
 
   const eta = new Eta({ views: path.resolve(process.cwd(), 'templates') });
 
   const render = await eta.renderAsync('raffle-form', {
+    entrantId,
     entrant: _.pick(entrant, ['name', 'contact', 'numberOfEntries']),
     entries: entriesCount,
     prizes,
