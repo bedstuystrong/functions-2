@@ -23,6 +23,7 @@
       border-radius: 0;
       -moz-appearance: textfield;
       border-width: 2px;
+      text-align: center;
     }
     .numberField input::-webkit-outer-spin-button,
     .numberField input::-webkit-inner-spin-button {
@@ -45,7 +46,11 @@
     .form-grid-row .form-grid-input-col {
       min-width: 8rem;
       max-width: 10rem;
+    }
 
+    .submitButton:disabled {
+      opacity: 0.5;
+      cursor: default;
     }
   </style>
 </head>
@@ -65,8 +70,9 @@
       <% it.prizes.forEach((prize)=> { %>
         <div class="form-grid-row">
           <label for="<%= prize.id %>">
-            <span class="<%= prize.color %> pill px1 inline-block">
-              <%= prize.name %> (<%= prize.value %>)
+            <span class="<%= prize.color %> pill pr1 inline-block">
+              <%= prize.name %>
+              <% if (prize.value) { %>($<%= prize.value %>)<% } %>
             </span>
           </label>
           <div class="numberField baymax form-grid-input-col">
@@ -87,7 +93,7 @@
       <% }) %>
       <div class="form-grid-row mt2">
         <label for="validationTotal">Total</label>
-        <div style="" class="form-grid-input-col">
+        <div style="text-align: center;" class="form-grid-input-col">
           <span id="validationTotal">?</span>/<%= it.entrant.numberOfEntries %>
         </div>
       </div>
@@ -107,6 +113,7 @@
 
   const form = document.querySelector('form');
   const inputs = document.querySelectorAll('input[type=number]');
+  const submit = document.querySelector('.submitButton');
   const sumInputs = () => [...inputs].map(i => parseInt(i.value)).reduce((a, b) => a + b);
   
   const onQuantityChange = (event) => {
@@ -115,8 +122,10 @@
     if (sum > totalEntries) {
       // TODO
       form.classList.add('form--invalid');
+      submit.setAttribute('disabled', true);
     } else {
       form.classList.remove('form--invalid');
+      submit.removeAttribute('disabled');
     }
   };
 
@@ -128,7 +137,7 @@
   const increment = (event) => {
     const input = document.getElementById(event.target.dataset.input);
     if (!input.max || input.value < parseInt(input.max)) {
-      input.value++;    
+      input.value++;
     }
     onQuantityChange();
   };

@@ -33,6 +33,8 @@ export default async (request: Request, context: Context) => {
     return;
   }
 
+  const redirectUrl = `${context.site.url}/raffle-form?recordId=${entrantId}`;
+
   const raffleBase = new AirtableBase('raffle');
   const entrantsTable = raffleBase.table('entrants');
   const entriesTable = raffleBase.table('entries');
@@ -40,6 +42,12 @@ export default async (request: Request, context: Context) => {
   const entrant = entrantsTable.normalize(await entrantsTable._table.find(entrantId));
   if (!entrant) {
     return;
+  }
+
+  const calculatedEntries = Object.values(prizes).reduce((a, b) => a + b);
+  if (calculatedEntries > entrant.numberOfEntries) {
+    // TODO
+    throw new Error('too many entries');
   }
 
   const entries = await getEntriesByEntrant(entrantId);
@@ -90,7 +98,7 @@ export default async (request: Request, context: Context) => {
     results.creates = createResults;
   }
 
-  return Response.redirect(`${context.site.url}/raffle-form?recordId=${entrantId}&success=true`);
+  return Response.redirect(`${redirectUrl}&success=true`);
 }
 
 export const config: Config = {

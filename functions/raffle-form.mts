@@ -5,12 +5,6 @@ import _ from 'lodash';
 
 import AirtableBase from '../lib/airtable.mjs';
 
-const getPrizeOptions = (meta) => {
-  const entriesTable = _.find(meta.tables, ['name', 'Entries']);
-  const prizeField = _.find(entriesTable?.fields, ['name', 'Prize'])
-  return prizeField?.options?.choices;
-};
-
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
   const entrantId = url.searchParams.get('recordId');
@@ -26,7 +20,9 @@ export default async (request: Request, context: Context) => {
 
   const entrant = entrantsTable.normalize(await entrantsTable._table.find(entrantId));
 
-  const prizes = (await prizesTable._table.select().all()).map(prizesTable.normalize);
+  const prizes = (await prizesTable._table.select({
+    sort: [{ field: 'Order', direction: 'asc' }]
+  }).all()).map(prizesTable.normalize);
 
   if (!prizes) {
     return;
