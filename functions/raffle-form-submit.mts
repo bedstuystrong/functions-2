@@ -5,6 +5,8 @@ import _ from 'lodash';
 import AirtableBase from '../lib/airtable.mjs';
 import { FieldSet } from 'airtable';
 
+const BASE_URL = Netlify.env.get('DEPLOY_PRIME_URL') || Netlify.env.get('URL');
+
 const getEntriesByEntrant = async (entrantId: string) => {
   const entriesTable = new AirtableBase('raffle').table('entries');
 
@@ -33,7 +35,7 @@ export default async (request: Request, context: Context) => {
     return;
   }
 
-  const redirectUrl = `${context.site.url}/raffle-form?recordId=${entrantId}`;
+  const redirectUrl = `${BASE_URL}/raffle-form?recordId=${entrantId}`;
 
   const raffleBase = new AirtableBase('raffle');
   const entrantsTable = raffleBase.table('entrants');

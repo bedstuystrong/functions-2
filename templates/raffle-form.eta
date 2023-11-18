@@ -58,8 +58,10 @@
 <div class="container sharedForm">
   <header>
     <div class="formHeader mx-auto max-width-2 lg-rounded-big md-rounded-big sm-rounded-big white ">
-      <h3 class="line-height-5">Raffle prize selection</h3>
-      <p>hi <strong><%= it.entrant.name %></strong>. you have <%= it.entrant.numberOfEntries %> raffle entries</p>
+      <div class="formLogoImageContainer"><img src="https://v5.airtableusercontent.com/v2/23/23/1700359200000/OnZnXPrh-Fp6HjqQ6Y9cqA/RCe_EO9EJFJOlfBlP9pUXAomQlbdgOn-raee01--HrbATfVbtvedpEyh_unBWrmkj4sE3reD6znqdXEmXXRpzJbAPFMoNy7sVLm3Op4o-0hWNxd73XHJhhux9nR4oAZ0iB5ujdcACmPMW4XDEJlDsQ/cKJGQQyUlypi7NEMRPEZY4AzmBv35SgV_P1dnzRFaIY" alt="Bed-Stuy Strong" style="max-width: 200px;"></div>
+      <h1 class="formName">Raffle prize selection</h3>
+      <p class="formDescription break-word">Thanks for entering, <strong><%= it.entrant.name %></strong>! You have <%= it.entrant.numberOfEntries %> raffle entries.</p>
+      <p class="formDescription break-word mt2">You can always come back to this page if you want to change your entries.</p>
     </div>
   </header>
 
@@ -100,9 +102,9 @@
     </div>
     <div class="formSubmit mx-auto max-width-2 baymax mt3 xs-px2">
       <button type="submit" class="submitButton blue rounded-big px2 py1 text-white strong huge border-none submit styled-input focus-visible pointer link-quiet">
-        Submit raffle entries
+        Submit choices
       </button>
-      <p class="mt2 quieter small">If you have problems email us at fund@bedstuystrong.com</p>
+      <p class="mt2 quieter small">If you have any issues with this form, email us at <a href="mailto:fund@bedstuystrong.com">fund@bedstuystrong.com</a>!</p>
     </div>
   </form>
 </div>
