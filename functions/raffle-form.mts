@@ -3,7 +3,7 @@ import path from 'node:path';
 import { Eta } from 'eta';
 import _ from 'lodash';
 
-import AirtableBase from '../lib/airtable.mjs';
+import AirtableBase, { type NormalizedAirtableRecord } from '../lib/airtable.mjs';
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
@@ -28,7 +28,7 @@ export default async (request: Request, context: Context) => {
     return;
   }
 
-  const entries = [];
+  const entries: NormalizedAirtableRecord[] = [];
   if (entrant.entries && entrant.entries.length) {
     for (const entryId of entrant.entries) {
       entries.push(entriesTable.normalize(await entriesTable._table.find(entryId)));
@@ -42,7 +42,7 @@ export default async (request: Request, context: Context) => {
 
   const render = await eta.renderAsync('raffle-form', {
     entrantId,
-    entrant: _.pick(entrant, ['name', 'contact', 'numberOfEntries']),
+    entrant: _.pick(entrant, ['name', 'contact', 'donationAmount', 'numberOfEntries']),
     entries: entriesCount,
     prizes,
   });

@@ -30,6 +30,7 @@
             "number": "Entrant number",
             "name": "Name",
             "contact": "Email or phone number",
+            "donationAmount": "Donation amount",
             "numberOfEntries": "Number of entries",
             "entries": "Entries"
           }

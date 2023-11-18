@@ -26,7 +26,7 @@ interface AirtableConfig {
   bases: AirtableBaseConfig[];
 }
 
-interface NormalizedAirtableRecord {
+export interface NormalizedAirtableRecord {
   id: string;
   _record: Airtable.Record<Airtable.FieldSet>;
   _meta?: Record<string, any> | null;
