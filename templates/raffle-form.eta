@@ -17,6 +17,7 @@
 
     .numberField {
       display: flex;
+      align-self: start;
     }
     .numberField input[type=number] {
       width: 100%;
@@ -24,6 +25,8 @@
       -moz-appearance: textfield;
       border-width: 2px;
       text-align: center;
+      font-size: 15px;
+      line-height: 20px;
     }
     .numberField input::-webkit-outer-spin-button,
     .numberField input::-webkit-inner-spin-button {
@@ -34,11 +37,12 @@
     .form-grid {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
     .form-grid-row {
       display: flex;
       align-items: center;
+      font-size: 15px;
     }
     .form-grid-row label {
       flex: 1;
@@ -72,10 +76,13 @@
       <% it.prizes.forEach((prize)=> { %>
         <div class="form-grid-row">
           <label for="<%= prize.id %>">
-            <span class="<%= prize.color %> pill pr1 inline-block">
+            <span class="pr1 inline-block">
               <%= prize.name %>
               <% if (prize.value) { %>($<%= prize.value %>)<% } %>
             </span>
+            <% if (prize.description) { %>
+              <br /><span class="quieter small"><%= prize.description %></span>
+            <% } %>
           </label>
           <div class="numberField baymax form-grid-input-col">
             <button type="button" aria-label="decrement" data-input="<%= prize.id %>" class="decrement rounded-left pl1 pr-three-quarters darken1 darken2-hover pointer" tabindex="-1">-</button>

@@ -51,6 +51,7 @@
           "schema": {
             "name": "Name",
             "value": "Value",
+            "description": "Description",
             "color": "Color"
           }
         }
