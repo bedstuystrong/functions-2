@@ -58,7 +58,7 @@
 <div class="container sharedForm">
   <header>
     <div class="formHeader mx-auto max-width-2 lg-rounded-big md-rounded-big sm-rounded-big white ">
-      <div class="formLogoImageContainer"><img src="https://v5.airtableusercontent.com/v2/23/23/1700359200000/OnZnXPrh-Fp6HjqQ6Y9cqA/RCe_EO9EJFJOlfBlP9pUXAomQlbdgOn-raee01--HrbATfVbtvedpEyh_unBWrmkj4sE3reD6znqdXEmXXRpzJbAPFMoNy7sVLm3Op4o-0hWNxd73XHJhhux9nR4oAZ0iB5ujdcACmPMW4XDEJlDsQ/cKJGQQyUlypi7NEMRPEZY4AzmBv35SgV_P1dnzRFaIY" alt="Bed-Stuy Strong" style="max-width: 200px;"></div>
+      <div class="formLogoImageContainer"><img src="https://bedstuystrong.com/logo_nopadding.png" alt="Bed-Stuy Strong" style="max-width: 127px; margin: 8px 2px;"></div>
       <h1 class="formName">Raffle prize selection</h3>
       <p class="formDescription break-word">Thanks for entering, <strong><%= it.entrant.name %></strong>! You have <%= it.entrant.numberOfEntries %> raffle entries.</p>
       <p class="formDescription break-word mt2">You can always come back to this page if you want to change your entries.</p>
