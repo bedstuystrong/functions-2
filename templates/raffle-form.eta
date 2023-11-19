@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Raffle prize selection</title>
+  <link rel="stylesheet" href="https://airtable.com/css/compiled/all.css">
+  <style type="text/css">
+    .form {
+    }
+    .form--invalid {
+    
+    }
+    .form--invalid #validationTotal {
+      color: red;
+    }
+
+    .numberField {
+      display: flex;
+    }
+    .numberField input[type=number] {
+      width: 100%;
+      border-radius: 0;
+      -moz-appearance: textfield;
+      border-width: 2px;
+      text-align: center;
+    }
+    .numberField input::-webkit-outer-spin-button,
+    .numberField input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .form-grid-row {
+      display: flex;
+      align-items: center;
+    }
+    .form-grid-row label {
+      flex: 1;
+    }
+    .form-grid-row .form-grid-input-col {
+      min-width: 8rem;
+      max-width: 10rem;
+    }
+
+    .submitButton:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+<div class="container sharedForm">
+  <header>
+    <div class="formHeader mx-auto max-width-2 lg-rounded-big md-rounded-big sm-rounded-big white ">
+      <div class="formLogoImageContainer"><img src="https://bedstuystrong.com/logo_nopadding.png" alt="Bed-Stuy Strong" style="max-width: 127px; margin: 8px 2px;"></div>
+      <h1 class="formName">Raffle prize selection</h3>
+      <p class="formDescription break-word">Thanks for entering, <strong><%= it.entrant.name %></strong>! You have <%= it.entrant.numberOfEntries %> raffle tickets.</p>
+      <p class="formDescription break-word mt2">You can always come back to this page if you want to change your selection.</p>
+    </div>
+  </header>
+
+  <form class="form formFieldAndSubmitContainer" method="POST" action="/raffle-form/submit" data-netlify="false">
+    <div class="formFieldContainer form-grid mx-auto my3 xs-px2 max-width-2">
+      <input type="hidden" name="entrantId" value="<%= it.entrantId %>" />
+      <input type="hidden" name="totalEntries" value="<%= it.entrant.numberOfEntries %>" />
+      <% it.prizes.forEach((prize)=> { %>
+        <div class="form-grid-row">
+          <label for="<%= prize.id %>">
+            <span class="<%= prize.color %> pill pr1 inline-block">
+              <%= prize.name %>
+              <% if (prize.value) { %>($<%= prize.value %>)<% } %>
+            </span>
+          </label>
+          <div class="numberField baymax form-grid-input-col">
+            <button type="button" aria-label="decrement" data-input="<%= prize.id %>" class="decrement rounded-left pl1 pr-three-quarters darken1 darken2-hover pointer" tabindex="-1">-</button>
+            <input
+              type="number"
+              value="<%= it.entries[prize.id]?.quantity || 0 %>"
+              name="prizes[<%= prize.id %>]"
+              id="<%= prize.id %>"
+              min="0"
+              max="100"
+              step="1"
+              class="border-thick border-darken2 border-darken3-hover detailCursor-border-blue border-blue-focus detailCursor-stroked-blue-focus"
+            />
+            <button type="button" aria-label="increment" data-input="<%= prize.id %>" class="increment rounded-right pr1 pl-three-quarters darken1 darken2-hover pointer" tabindex="-1">+</button>
+          </div>
+        </div>
+      <% }) %>
+      <div class="form-grid-row mt2">
+        <label for="validationTotal">Total</label>
+        <div style="text-align: center;" class="form-grid-input-col">
+          <span id="validationTotal">?</span>/<%= it.entrant.numberOfEntries %>
+        </div>
+      </div>
+    </div>
+    <div class="formSubmit mx-auto max-width-2 baymax mt3 xs-px2">
+      <button type="submit" class="submitButton blue rounded-big px2 py1 text-white strong huge border-none submit styled-input focus-visible pointer link-quiet">
+        Submit
+      </button>
+      <p class="mt2 quieter small">If you have any issues with this form, email us at <a href="mailto:fund@bedstuystrong.com">fund@bedstuystrong.com</a>.</p>
+    </div>
+  </form>
+</div>
+
+<script type="text/javascript">
+  const totalEntries = parseInt(document.querySelector('input[name=totalEntries]').value);
+  const validationTotal = document.getElementById('validationTotal');
+
+  const form = document.querySelector('form');
+  const inputs = document.querySelectorAll('input[type=number]');
+  const submit = document.querySelector('.submitButton');
+  const sumInputs = () => [...inputs].map(i => parseInt(i.value)).reduce((a, b) => a + b);
+  
+  const onQuantityChange = (event) => {
+    const sum = sumInputs();
+    validationTotal.innerText = sum;
+    if (sum > totalEntries) {
+      // TODO
+      form.classList.add('form--invalid');
+      submit.setAttribute('disabled', true);
+    } else {
+      form.classList.remove('form--invalid');
+      submit.removeAttribute('disabled');
+    }
+  };
+
+  onQuantityChange();
+  inputs.forEach((input) => {
+    input.addEventListener('change', onQuantityChange);
+  });
+
+  const increment = (event) => {
+    const input = document.getElementById(event.target.dataset.input);
+    if (!input.max || input.value < parseInt(input.max)) {
+      input.value++;
+    }
+    onQuantityChange();
+  };
+  const decrement = (event) => {
+    const input = document.getElementById(event.target.dataset.input);
+    if (!input.min || input.value > parseInt(input.min)) {
+      input.value--;
+    }
+    onQuantityChange();
+  };
+  document.querySelectorAll('.numberField .increment').forEach((button) => {
+    button.addEventListener('click', increment);
+  });
+  document.querySelectorAll('.numberField .decrement').forEach((button) => {
+    button.addEventListener('click', decrement);
+  });
+
+</script>
+</body>
+
+</html>

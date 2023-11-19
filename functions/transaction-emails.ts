@@ -8,8 +8,8 @@ import pick from 'lodash/pick';
 import findKey from 'lodash/findKey';
 import { flow, get, map, first } from 'lodash/fp';
 
-import AirtableBase from 'lib/airtable';
-import parseMultipartForm from 'lib/multipart';
+import AirtableBase from '../lib/airtable.mjs';
+import parseMultipartForm from '../lib/multipart';
 
 const withIntegrations = wrap(withSentry);
 
