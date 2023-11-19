@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Raffle entry form</title>
+  <title>Raffle prize selection</title>
   <link rel="stylesheet" href="https://airtable.com/css/compiled/all.css">
   <style type="text/css">
     .form {
@@ -60,8 +60,8 @@
     <div class="formHeader mx-auto max-width-2 lg-rounded-big md-rounded-big sm-rounded-big white ">
       <div class="formLogoImageContainer"><img src="https://bedstuystrong.com/logo_nopadding.png" alt="Bed-Stuy Strong" style="max-width: 127px; margin: 8px 2px;"></div>
       <h1 class="formName">Raffle prize selection</h3>
-      <p class="formDescription break-word">Thanks for entering, <strong><%= it.entrant.name %></strong>! You have <%= it.entrant.numberOfEntries %> raffle entries.</p>
-      <p class="formDescription break-word mt2">You can always come back to this page if you want to change your entries.</p>
+      <p class="formDescription break-word">Thanks for entering, <strong><%= it.entrant.name %></strong>! You have <%= it.entrant.numberOfEntries %> raffle tickets.</p>
+      <p class="formDescription break-word mt2">You can always come back to this page if you want to change your selection.</p>
     </div>
   </header>
 
@@ -102,9 +102,9 @@
     </div>
     <div class="formSubmit mx-auto max-width-2 baymax mt3 xs-px2">
       <button type="submit" class="submitButton blue rounded-big px2 py1 text-white strong huge border-none submit styled-input focus-visible pointer link-quiet">
-        Submit choices
+        Submit
       </button>
-      <p class="mt2 quieter small">If you have any issues with this form, email us at <a href="mailto:fund@bedstuystrong.com">fund@bedstuystrong.com</a>!</p>
+      <p class="mt2 quieter small">If you have any issues with this form, email us at <a href="mailto:fund@bedstuystrong.com">fund@bedstuystrong.com</a>.</p>
     </div>
   </form>
 </div>
