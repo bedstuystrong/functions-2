@@ -11,7 +11,7 @@ export default function parseMultipartForm(request: Request) {
     const busboy = Busboy({
       // it uses request headers
       // to extract the form boundary value (the ----WebKitFormBoundary thing)
-      headers: request.headers
+      headers: Object.fromEntries(request.headers.entries()),
     });
 
     // whenever busboy comes across a normal field ...
@@ -36,7 +36,9 @@ export default function parseMultipartForm(request: Request) {
     });
 
     // now that all handlers are set up, we can finally start processing our request!
-    const decodedBody = Buffer.from(request.body, 'base64').toString('ascii');
-    busboy.end(decodedBody);
+    return request.text().then((body) => {
+      const decodedBody = Buffer.from(body, 'base64').toString('ascii');
+      busboy.end(decodedBody);
+    });
   });
 }
