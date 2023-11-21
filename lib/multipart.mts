@@ -37,6 +37,7 @@ export default function parseMultipartForm(request: Request) {
 
     // now that all handlers are set up, we can finally start processing our request!
     return request.text().then((body) => {
+      console.log(body)
       const decodedBody = Buffer.from(body, 'base64').toString('ascii');
       busboy.end(decodedBody);
     });
