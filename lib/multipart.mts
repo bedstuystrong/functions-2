@@ -1,9 +1,8 @@
 // @ts-nocheck
 import Busboy from 'busboy';
-import type { HandlerEvent } from '@netlify/functions';
 
 // https://www.netlify.com/blog/2021/07/29/how-to-process-multipart-form-data-with-a-netlify-function/
-export default function parseMultipartForm(event: HandlerEvent) {
+export default function parseMultipartForm(request: Request) {
   return new Promise((resolve, reject) => {
     // we'll store all form fields inside of this
     const fields: any = {};
@@ -12,7 +11,7 @@ export default function parseMultipartForm(event: HandlerEvent) {
     const busboy = Busboy({
       // it uses request headers
       // to extract the form boundary value (the ----WebKitFormBoundary thing)
-      headers: event.headers
+      headers: request.headers
     });
 
     // whenever busboy comes across a normal field ...
@@ -37,7 +36,7 @@ export default function parseMultipartForm(event: HandlerEvent) {
     });
 
     // now that all handlers are set up, we can finally start processing our request!
-    const decodedBody = Buffer.from(event.body, 'base64').toString('ascii');
+    const decodedBody = Buffer.from(request.body, 'base64').toString('ascii');
     busboy.end(decodedBody);
   });
 }

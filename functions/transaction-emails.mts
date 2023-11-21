@@ -1,19 +1,14 @@
-import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
-import { wrap } from '@netlify/integrations';
-import { type SentryContext, withSentry } from '@netlify/sentry';
+import { Context } from '@netlify/functions';
 import { simpleParser } from 'mailparser';
 import { type AddressObject, EmailAddress } from 'mailparser';
 import sendgridMail from '@sendgrid/mail';
-import pick from 'lodash/pick';
-import findKey from 'lodash/findKey';
-import { flow, get, map, first } from 'lodash/fp';
+import _ from 'lodash';
+import fp from 'lodash/fp.js';
 
 import AirtableBase from '../lib/airtable.mjs';
-import parseMultipartForm from '../lib/multipart';
+import parseMultipartForm from '../lib/multipart.mjs';
 
-const withIntegrations = wrap(withSentry);
-
-sendgridMail.setApiKey(process.env.SENDGRID_API_KEY);
+sendgridMail.setApiKey(Netlify.env.get('SENDGRID_API_KEY'));
 
 const FUND_EMAIL_ADDRESS = 'fund@bedstuystrong.com';
 
@@ -81,15 +76,15 @@ const PLATFORMS = {
   },
 };
 
-const getFirstEmailAddressFromHeader = (header: AddressObject) => flow(
-  get('value'),
-  map((v: EmailAddress) => v.address),
-  first,
+const getFirstEmailAddressFromHeader = (header: AddressObject) => fp.flow(
+  fp.get('value'),
+  fp.map((v: EmailAddress) => v.address),
+  fp.head,
 )(header);
 
 const detectPaymentPlatform = (email: Email, { isAutoForwarded }: { isAutoForwarded: boolean }) => {
   if (isAutoForwarded) {
-    return findKey(PLATFORMS, (platform) => {
+    return _.findKey(PLATFORMS, (platform) => {
       if (platform.from) {
         return platform.from === email.from;
       } else {
@@ -97,7 +92,7 @@ const detectPaymentPlatform = (email: Email, { isAutoForwarded }: { isAutoForwar
       }
     });
   } else {
-    return findKey(PLATFORMS, platform => platform.regex.test(email.text));
+    return _.findKey(PLATFORMS, platform => platform.regex.test(email.text));
   }
 };
 
@@ -250,20 +245,19 @@ const extractPaymentDetails = (platform: string, email: Email) => {
   return details;
 };
 
-const handler: Handler = withIntegrations(async (event: HandlerEvent, context: HandlerContext & SentryContext) => {
-  const formData = await parseMultipartForm(event) as Record<string, any>;
+export default async (request: Request, context: Context) => {
+  const formData = await parseMultipartForm(request) as Record<string, any>;
   if (!formData.email) {
     console.warn('Request missing email', formData);
-    return {
-      statusCode: 200,
-      body: 'OK',
-    };
+    return new Response('OK', {
+      status: 200,
+    });
   }
 
   const parsed = await simpleParser(formData.email);
   const email = {
-    ...pick(formData, ['to', 'from', 'subject']),
-    ...pick(parsed, ['html', 'text']),
+    ..._.pick(formData, ['to', 'from', 'subject']),
+    ..._.pick(parsed, ['html', 'text']),
   } as Email;
 
   const date = parsed.headers.get('date');
@@ -272,10 +266,9 @@ const handler: Handler = withIntegrations(async (event: HandlerEvent, context: H
   if (email.to.split('@')[0] !== 'funds' && email.to !== FUND_EMAIL_ADDRESS) {
     // Log and do nothing
     console.warn('Received email for user other than funds@', parsed);
-    return {
-      statusCode: 200,
-      body: 'OK',
-    };
+    return new Response('OK', {
+      status: 200,
+    });
   }
 
   const isAutoForwarded = email.to === FUND_EMAIL_ADDRESS;
@@ -285,10 +278,9 @@ const handler: Handler = withIntegrations(async (event: HandlerEvent, context: H
   if (!isAutoForwarded && email.from !== FUND_EMAIL_ADDRESS) {
     // Log and do nothing
     console.warn('Received email from unauthorized forwarder', parsed);
-    return {
-      statusCode: 200,
-      body: 'OK',
-    };
+    return new Response('OK', {
+      status: 200,
+    });
   }
 
   const paymentPlatform = detectPaymentPlatform(email, { isAutoForwarded });
@@ -310,11 +302,7 @@ const handler: Handler = withIntegrations(async (event: HandlerEvent, context: H
   // @ts-ignore FIXME
   await createFinanceTransaction(Object.assign(details, { date }));
 
-  return {
-    statusCode: 200,
-    body: 'OK',
-  };
-
-});
-
-export { handler };
+  return new Response('OK', {
+    status: 200,
+  });
+}
