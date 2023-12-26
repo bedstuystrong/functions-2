@@ -51,6 +51,7 @@ export default async (request: Request, context: Context) => {
         status: 400,
       });
     } else {
+      console.log('slack error', error, { airtableMemberId });
       throw error;
     }
   }
@@ -70,7 +71,7 @@ export default async (request: Request, context: Context) => {
       email_verified: true,
     });
   } catch (error) {
-    console.log('auth0 error', error);
+    console.log('auth0 error', error, { airtableMemberId });
     throw error;
   }
 
@@ -93,7 +94,7 @@ export default async (request: Request, context: Context) => {
       html: juice(renderedEmail, { removeStyleTags: false }),
     });
   } catch (error) {
-    console.log('email error', error);
+    console.log('email error', error, { airtableMemberId });
     throw error;
   }
   // set as processed? or do in airtable?
