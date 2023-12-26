@@ -12,7 +12,12 @@ sendgridMail.setApiKey(Netlify.env.get('SENDGRID_API_KEY')!);
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
+  const token = url.searchParams.get('token');
   const airtableMemberId = url.searchParams.get('memberId');
+
+  if (!token || token !== Netlify.env.get('AIRTABLE_AUTOMATION_AUTH_TOKEN')) {
+    return new Response('Unauthorized', { status: 401 });
+  }
 
   if (!airtableMemberId) {
     return;
