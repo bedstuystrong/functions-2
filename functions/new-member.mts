@@ -26,81 +26,94 @@ export default async (request: Request, context: Context) => {
   const base = new AirtableBase('tickets');
   const membersTable = base.table('members');
 
-  // const meta = await base.meta();
-  // const statusField = meta.tables.find(table => table.name === membersTable.config.name)?.fields?.find(field => field.name === membersTable.config.schema.status);
-
   const member = membersTable.normalize(await membersTable._table.find(airtableMemberId));
   if (!member) {
     return;
   }
 
-  // look up slack membership 
-  const slackClient = new WebClient(Netlify.env.get('SLACK_API_TOKEN'));
   try {
-    const { user: slackUser } = await slackClient.users.lookupByEmail({
-      email: member.email,
-    });
-
-    // update member with slack id
-    await membersTable._table.update(airtableMemberId, membersTable.denormalize({
-      slackUserId: slackUser!.id,
-    }));
-  } catch (error) {
-    if (error?.data?.error === 'users_not_found') {
-      return new Response('Slack user does not exist', {
-        status: 400,
+    // look up slack membership 
+    const slackClient = new WebClient(Netlify.env.get('SLACK_API_TOKEN'));
+    try {
+      const { user: slackUser } = await slackClient.users.lookupByEmail({
+        email: member.email,
       });
-    } else {
-      console.log('slack error', error, { airtableMemberId });
+
+      // update member with slack id
+      await membersTable._table.update(airtableMemberId, membersTable.denormalize({
+        slackUserId: slackUser!.id,
+      }));
+    } catch (error) {
+      if (error?.data?.error === 'users_not_found') {
+        return new Response('Slack user does not exist', {
+          status: 400,
+        });
+      } else {
+        console.log('slack error', error, { airtableMemberId });
+        throw error;
+      }
+    }
+
+    // create auth0 user
+    try {
+      const management = new ManagementClient({
+        domain: Netlify.env.get('AUTH0_DOMAIN')!,
+        clientId: Netlify.env.get('AUTH0_CLIENT_ID')!,
+        clientSecret: Netlify.env.get('AUTH0_CLIENT_SECRET')!,
+      });
+
+      await management.users.create({
+        connection: 'email',
+        email: member.email,
+        name: member.name,
+        email_verified: true,
+      });
+    } catch (error) {
+      console.log('auth0 error', error, { airtableMemberId });
       throw error;
     }
-  }
 
-  // create auth0 user
-  try {
-    const management = new ManagementClient({
-      domain: Netlify.env.get('AUTH0_DOMAIN')!,
-      clientId: Netlify.env.get('AUTH0_CLIENT_ID')!,
-      clientSecret: Netlify.env.get('AUTH0_CLIENT_SECRET')!,
+    // Send the new member email
+    try {
+      const eta = new Eta({ views: path.resolve(process.cwd(), 'templates') });
+      const subject = 'Welcome to Bed-Stuy Strong!';
+      const renderedEmail = await eta.renderAsync('new-member-email', {
+        name: member.name,
+        subject,
+      });
+      await sendgridMail.send({
+        from: {
+          name: 'Bed-Stuy Strong',
+          email: 'community@mail.bedstuystrong.com',
+        },
+        to: member.email,
+        replyTo: 'community@bedstuystrong.com',
+        subject: subject,
+        html: juice(renderedEmail, { removeStyleTags: false }),
+      });
+    } catch (error) {
+      console.log('email error', error, { airtableMemberId });
+      throw error;
+    }
+    // set as processed? or do in airtable?
+
+    return Response.json({
+      cool: true,
     });
 
-    await management.users.create({
-      connection: 'email',
-      email: member.email,
-      name: member.name,
-      email_verified: true,
-    });
   } catch (error) {
-    console.log('auth0 error', error, { airtableMemberId });
-    throw error;
-  }
 
-  // Send the new member email
-  try {
-    const eta = new Eta({ views: path.resolve(process.cwd(), 'templates') });
-    const subject = 'Welcome to Bed-Stuy Strong!';
-    const renderedEmail = await eta.renderAsync('new-member-email', {
-      name: member.name,
-      subject,
+    console.error(error);
+    return new Response(JSON.stringify({
+      cool: false,
+      error: {
+        name: error?.name,
+        message: error?.message,
+      }
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
     });
-    await sendgridMail.send({
-      from: {
-        name: 'Bed-Stuy Strong',
-        email: 'community@mail.bedstuystrong.com',
-      },
-      to: member.email,
-      replyTo: 'community@bedstuystrong.com',
-      subject: subject,
-      html: juice(renderedEmail, { removeStyleTags: false }),
-    });
-  } catch (error) {
-    console.log('email error', error, { airtableMemberId });
-    throw error;
+
   }
-  // set as processed? or do in airtable?
-
-  return Response.json({
-    cool: true,
-  });
-
 }
