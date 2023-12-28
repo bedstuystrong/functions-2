@@ -56,6 +56,23 @@
           }
         }
       ]
+    },
+    {
+      "id": "appoJ59KQ73mhoPpu",
+      "key": "tickets",
+      "tables": [
+        {
+          "key": "members",
+          "name": "Volunteers - Form Responses",
+          "schema": {
+            "name": "Name",
+            "email": "Email Address",
+            "phoneNumber": "Phone Number",
+            "slackUserId": "Slack User ID",
+            "status": "Status"
+          }
+        }
+      ]
     }
   ]
 }

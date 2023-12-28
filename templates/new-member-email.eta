@@ -1,0 +1,71 @@
+<% layout('./email-layout.eta', {
+  subject: it.subject,
+  preview: 'We\'re so glad you\'re here. The best way to get started is to read through our New Member Guide.'
+}) %>
+
+<article>
+  <% const name = it.name || 'neighbor'; %>
+  <% const names = name.split(' '); %>
+  <p>Hi <%= names[0] %>,</p>
+  <p>Welcome to Bed-Stuy Strong. We’re so glad you’re here.</p>
+
+  <h2>Getting Started</h2>
+  <p>
+    The best way to get started is to read through our <strong><a href="https://docs.google.com/presentation/d/14VwmCJDqfjOM9IWMaEJzDsC7sVKZUwvkVJ8Sn0P9LSw/edit">New Member Guide</a></strong>.
+  </p>
+  <p>
+    This guide will walk you through accessing our <a href="https://home.bedstuystrong.com/">Member Hub</a>, where
+    you can find our community calendar, volunteer opportunities, and key information about our many projects andmodes of aid.
+  </p>
+  <p>
+    To get oriented, we ask all new members to attend a Welcome Call - you can find our upcoming meetings on
+    our <a href="https://bedstuystrong-outline.herokuapp.com/doc/community-calendar-cklqMG79BW">community calendar</a>. Look
+    for an upcoming “Welcome Meeting for New Members” event, and register using the Zoom sign up link on the calendar event.
+  </p>
+  <p>
+    If you can’t make an upcoming Welcome Call, just reply to this email and we’ll get in touch about orienting you to the BSS network!
+  </p>
+
+  <h2>Staying in the Loop</h2>
+  <p>
+    Keep an eye out in your email for our newsletter, where we circulate updates from around the community. If you’re on Instagram,
+    we suggest <a href="https://instagram.com/bedstuystrong">following us there</a> too. You’ll also receive a separate email invitation
+    to join our online forum on Slack, where you can send direct messages to neighbors and coordinate together in real time.
+  </p>
+
+  <h2>
+    Supporting Our Food Access Operation
+  </h2>
+  <p>
+    A staggering 1 in 4 families in New York City is currently food insecure, up from 1 in 8 before the current health crisis.
+    Donating funds and volunteering time are two great ways to have a direct impact on the safety and well-being of many Brooklynites
+    experiencing hardship.
+  </p>
+  <p>
+    Our grocery delivery operation is our biggest project, and help is <em>always</em> needed! If you’re able to commit to volunteering
+    with our intake phone line or delivering groceries once a week, and/or supporting us financially, this makes the biggest material
+    difference in our neighbors lives.
+  </p>
+  <p>
+    That said, all the ways we show up for each other are important. Whether it’s sharing medical supplies, offering social support,
+    learning from one another about the political moment, or posting photos of our pets to make each other smile. Currently, the easiest
+    place to do this is in <a href="https://bedstuystrong.slack.com/">our online forum on Slack</a>.
+  </p>
+
+  <h2>
+    Questions?
+  </h2>
+  <p>
+    Check out our <a href="https://home.bedstuystrong.com/doc/frequently-asked-questions-Jk0NS5BPpp">FAQs</a>! You can also email us
+    at <a href="mailto:bedstuystrong@bedstuystrong.com">bedstuystrong@bedstuystrong.com</a>, or in Slack, share your question in the
+    #ask_me_anything channel.
+  </p>
+  <p>
+    We are excited to have you as a Bed-Stuy Strong member: our work is best done together.
+  </p>
+  <br />
+  <p>
+    In Solidarity,<br />
+    BSS Community Building Team
+  </p>
+</article>
