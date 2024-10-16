@@ -108,7 +108,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
       details.platform = 'Venmo';
       const fromMatches = email.subject.match(/(?:Fwd:\s)?(.+) paid you (\$[\d.,]+)/);
       const toMatches = email.subject.match(/You paid (.+) (\$[\d.,]+)/);
-      const noteMatches = email.html.match(/<!-- note -->\s*<div>\s*<p>(.*)<\/p>/m);
+      const noteMatches = email.html.match(/<p class="[^"]*transaction-note[^"]*"[^>]*>(.*)<\/p>/m);
 
       if (fromMatches) {
         details.direction = 'In';
