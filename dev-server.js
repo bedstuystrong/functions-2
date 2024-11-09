@@ -9,10 +9,14 @@ const eta = new Eta({ views: path.resolve(process.cwd(), 'templates') });
 
 server.get('/email/:templateName', async function handler(request, reply) {
   const { templateName } = request.params;
+  const { inline, ...query } = request.query;
 
-  let html = await eta.renderAsync(templateName, {  });
+  let html = await eta.renderAsync(templateName, { 
+    ...query,
+    subject: query.subject || `${templateName} preview`,
+  });
 
-  if (request.query.inline) {
+  if (inline) {
     html = juice(html, { removeStyleTags: false })
   }
 
