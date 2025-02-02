@@ -298,7 +298,7 @@ export default async (request: Request, context: Context) => {
 
   const details = extractPaymentDetails(paymentPlatform, email);
 
-  console.log({ ...details, date })
+  console.log({ ...details, date, messageId: parsed.messageId })
   // @ts-ignore FIXME
   await createFinanceTransaction(Object.assign(details, { date }));
 
