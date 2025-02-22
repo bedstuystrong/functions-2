@@ -8,7 +8,7 @@ import fp from 'lodash/fp.js';
 import AirtableBase from '../lib/airtable.mjs';
 import parseMultipartForm from '../lib/multipart.mjs';
 
-sendgridMail.setApiKey(Netlify.env.get('SENDGRID_API_KEY'));
+sendgridMail.setApiKey(Netlify.env.get('SENDGRID_API_KEY')!);
 
 const FUND_EMAIL_ADDRESS = 'fund@bedstuystrong.com';
 
@@ -27,6 +27,7 @@ interface FinanceTransaction {
   amount: number;
   name: string;
   note?: string;
+  messageId?: string;
 }
 
 const FINANCE_TRANSACTION_DIRECTIONS = {
@@ -34,7 +35,7 @@ const FINANCE_TRANSACTION_DIRECTIONS = {
   Out: 'reckW3l4mK8BCEBsd',
 };
 
-const createFinanceTransaction = async ({ direction, platform, amount, name, note, date }: FinanceTransaction) => {
+const createFinanceTransaction = async ({ direction, platform, amount, name, note, date, messageId }: FinanceTransaction) => {
   const transactions = new AirtableBase('finance').table('transactions');
 
   const directionID = FINANCE_TRANSACTION_DIRECTIONS[direction];
@@ -46,6 +47,7 @@ const createFinanceTransaction = async ({ direction, platform, amount, name, not
     name: name,
     notes: note,
     date: date,
+    messageId: messageId,
   });
 }
 
@@ -255,10 +257,11 @@ export default async (request: Request, context: Context) => {
   }
 
   const parsed = await simpleParser(formData.email);
-  const email = {
+  const email: Email = {
     ..._.pick(formData, ['to', 'from', 'subject']),
-    ..._.pick(parsed, ['html', 'text']),
-  } as Email;
+    html: parsed.html || parsed.text || "",
+    text: parsed.text || "",
+  };
 
   const date = parsed.headers.get('date');
   email.to = getFirstEmailAddressFromHeader(parsed.headers.get('to') as AddressObject);
@@ -298,9 +301,13 @@ export default async (request: Request, context: Context) => {
 
   const details = extractPaymentDetails(paymentPlatform, email);
 
-  console.log({ ...details, date, messageId: parsed.messageId })
-  // @ts-ignore FIXME
-  await createFinanceTransaction(Object.assign(details, { date }));
+  console.log({ ...details, date })
+
+  // @ts-ignore FIXME date type incompatible 
+  await createFinanceTransaction(Object.assign(details, {
+    date, 
+    messageId: parsed.messageId,
+ }));
 
   return new Response('OK', {
     status: 200,

@@ -14,7 +14,8 @@
             "platform": "Platform",
             "notes": "Notes",
             "direction": "Direction",
-            "labels": "Labels"
+            "labels": "Labels",
+            "messageId": "email_message_id"
           }
         }
       ]
