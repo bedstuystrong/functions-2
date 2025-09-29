@@ -5,4 +5,5 @@ included_files = ["airtable.config.json", "./templates"]
 [dev]
 command = "node dev-server.js"
 targetPort = 3001
+functionsPort = 3002
 autoLaunch = false

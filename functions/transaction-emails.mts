@@ -1,16 +1,14 @@
 import { Context } from '@netlify/functions';
-import { simpleParser } from 'mailparser';
-import { type AddressObject, EmailAddress } from 'mailparser';
-import sendgridMail from '@sendgrid/mail';
+import type { Models } from 'postmark';
 import _ from 'lodash';
-import fp from 'lodash/fp.js';
 
 import AirtableBase from '../lib/airtable.mjs';
-import parseMultipartForm from '../lib/multipart.mjs';
 
-sendgridMail.setApiKey(Netlify.env.get('SENDGRID_API_KEY')!);
+type InboundMessageDetails = Models.InboundMessageDetails;
+type InboundRecipient = Models.InboundRecipient;
 
 const FUND_EMAIL_ADDRESS = 'fund@bedstuystrong.com';
+const INBOUND_EMAIL_ADDRESS = Netlify.env.get('POSTMARK_INBOUND_EMAIL_ADDRESS');
 
 interface Email {
   to: string;
@@ -24,7 +22,7 @@ interface FinanceTransaction {
   date: string; // ?
   direction: 'In' | 'Out';
   platform: 'Venmo' | 'Zelle' | 'Paypal' | 'Google Pay' | 'Cash App';
-  amount: number;
+  amount: string;
   name: string;
   note?: string;
   messageId?: string;
@@ -77,12 +75,6 @@ const PLATFORMS = {
     regex: /From: Cash App <cash@square\.com>/
   },
 };
-
-const getFirstEmailAddressFromHeader = (header: AddressObject) => fp.flow(
-  fp.get('value'),
-  fp.map((v: EmailAddress) => v.address),
-  fp.head,
-)(header);
 
 const detectPaymentPlatform = (email: Email, { isAutoForwarded }: { isAutoForwarded: boolean }) => {
   if (isAutoForwarded) {
@@ -247,40 +239,40 @@ const extractPaymentDetails = (platform: string, email: Email) => {
   return details;
 };
 
-export default async (request: Request, context: Context) => {
-  const formData = await parseMultipartForm(request) as Record<string, any>;
-  if (!formData.email) {
-    console.warn('Request missing email', formData);
-    return new Response('OK', {
-      status: 200,
-    });
+const INBOUND_FIELDS = ['From', 'FromName', 'FromFull', 'To', 'ToFull', 'Cc', 'CcFull', 'Bcc', 'BccFull', 'ReplyTo', 'OriginalRecipient', 'Subject', 'Date', 'MailboxHash', 'MessageID', 'Attachments', 'MessageStream', 'TextBody', 'HtmlBody', 'StrippedTextReply', 'Headers']; // prettier-ignore
+function assertInboundMessage(
+  body: InboundMessageDetails
+): asserts body is InboundMessageDetails {
+  if (INBOUND_FIELDS.some((key) => Object.hasOwn(body, key) === false)) {
+    const missing = INBOUND_FIELDS.filter((key) => Object.hasOwn(body, key) === false);
+    throw new Error(`Missing required fields from InboundMessageDetails: ${missing.join(', ')}`);
   }
+}
 
-  const parsed = await simpleParser(formData.email);
+export default async (request: Request, context: Context) => {
+  const message = await request.json();
+  assertInboundMessage(message);
+
   const email: Email = {
-    ..._.pick(formData, ['to', 'from', 'subject']),
-    html: parsed.html || parsed.text || "",
-    text: parsed.text || "",
+    to: message.To,
+    from: message.From,
+    subject: message.Subject,
+    html: message.HtmlBody || message.TextBody || '',
+    text: message.TextBody || '',
   };
 
-  const date = parsed.headers.get('date');
-  email.to = getFirstEmailAddressFromHeader(parsed.headers.get('to') as AddressObject);
+  const date = message.Date;
+  const isAutoForwarded = email.to === FUND_EMAIL_ADDRESS;
 
-  if (email.to.split('@')[0] !== 'funds' && email.to !== FUND_EMAIL_ADDRESS) {
+  if (!isAutoForwarded && email.to !== INBOUND_EMAIL_ADDRESS) {
     // Log and do nothing
-    console.warn('Received email for user other than funds@', parsed);
+    console.warn('Received email for user other than funds@', message);
     return new Response('OK', {
       status: 200,
     });
-  }
-
-  const isAutoForwarded = email.to === FUND_EMAIL_ADDRESS;
-
-  email.from = getFirstEmailAddressFromHeader(parsed.headers.get('from') as AddressObject);
-
-  if (!isAutoForwarded && email.from !== FUND_EMAIL_ADDRESS) {
+  } else if (!isAutoForwarded && email.from !== FUND_EMAIL_ADDRESS) {
     // Log and do nothing
-    console.warn('Received email from unauthorized forwarder', parsed);
+    console.warn('Received email from unauthorized forwarder', message);
     return new Response('OK', {
       status: 200,
     });
@@ -289,14 +281,14 @@ export default async (request: Request, context: Context) => {
   const paymentPlatform = detectPaymentPlatform(email, { isAutoForwarded });
   if (!paymentPlatform) {
     // todo error
-    console.error(parsed);
-    await sendgridMail.send({
-      from: 'finance-script@em9481.mail.bedstuystrong.com',
-      to: FUND_EMAIL_ADDRESS,
-      subject: 'Error parsing payment email',
-      text: `Timestamp: ${(new Date()).toString()}`
-    });
-    throw new Error('Couldn\'t detect payment platform');
+    console.error(message);
+    // await sendgridMail.send({
+    //   from: 'finance-script@em9481.mail.bedstuystrong.com',
+    //   to: FUND_EMAIL_ADDRESS,
+    //   subject: 'Error parsing payment email',
+    //   text: `Timestamp: ${(new Date()).toString()}`
+    // });
+    throw new Error('Couldn't detect payment platform');
   }
 
   const details = extractPaymentDetails(paymentPlatform, email);

@@ -47,6 +47,7 @@ export default class AirtableBase {
       try {
         const configFile = fs.readFileSync(path.resolve(process.cwd(), 'airtable.config.json'), 'utf8');
         config = JSON.parse(configFile);
+        invariant(config, 'config cannot be empty');
       } catch (error) {
         const isENOENT = isNodeError(error) && error.code === 'ENOENT';
         const errorMessage = isENOENT ? `Missing Airtable config: Can't find default config file airtable.config.json` : error;
@@ -58,8 +59,9 @@ export default class AirtableBase {
       apiKey: Netlify.env.get('AIRTABLE_API_KEY'),
     });
 
-    this.config = _.find(config.bases, ['key', baseKey]);
-    invariant(this.config, `could not find base with key "${baseKey}" in config`);
+    const baseConfig = _.find(config.bases, ['key', baseKey]);
+    invariant(baseConfig, `could not find base with key '${baseKey}' in config`);
+    this.config = baseConfig;
 
     this._base = this.client.base(this.config.id);
   }
@@ -92,8 +94,9 @@ class AirtableTable {
     this.base = base;
     this.client = this.base.client;
 
-    this.config = _.find(this.base.config.tables, ['key', tableKey]);
-    invariant(this.config, `could not find table with key "${tableKey}" in base "${this.base.config.key}" config`);
+    const config = _.find(this.base.config.tables, ['key', tableKey]);
+    invariant(config, `could not find table with key '${tableKey}' in base '${this.base.config.key}' config`);
+    this.config = config;
 
     this._table = this.base._base(this.config.name);
   }
@@ -102,17 +105,29 @@ class AirtableTable {
     data: Record<string, any> | Record<string, any>[],
     params?: RecordCreateOptionalParameters
   ): Promise<NormalizedAirtableRecord | NormalizedAirtableRecord[]> => {
-    const payload = Array.isArray(data) ? data.map((fields) => ({
-      fields: this.denormalize(fields),
-    })) : this.denormalize(data);
-    // @ts-ignore-error FIXME
-    const result = await this._table.create(payload, {
-      typecast: true,
-      ...params,
-    });
-    // @ts-ignore-error FIXME
-    return Array.isArray(result) ? result.map(this.normalize) : this.normalize(result);
-  }
+    const payload = Array.isArray(data)
+      ? data.map((fields) => ({
+          fields: this.denormalize(fields),
+        }))
+      : this.denormalize(data);
+    try {
+      // @ts-ignore-error FIXME
+      const result = await this._table.create(payload, {
+        typecast: true,
+        ...params,
+      });
+      return Array.isArray(result)
+        ? result.map(this.normalize)
+        : // @ts-ignore-error FIXME
+          this.normalize(result);
+    } catch (error) {
+      if (error instanceof Airtable.Error) {
+        throw AirtableStackError.fromAirtableError(error);
+      } else {
+        throw error;
+      }
+    }
+  };
 
   normalize = (record: Airtable.Record<Airtable.FieldSet>): NormalizedAirtableRecord => {
     const fields = { ...record.fields };
@@ -146,4 +161,18 @@ class AirtableTable {
 
     return denormalized;
   };
+}
+
+// wrap AirtableError with a stack trace (https://github.com/netlify/cli/issues/6215)
+export class AirtableStackError extends Airtable.Error {
+  stack: string;
+
+  constructor(error: string, message: string, statusCode: number) {
+    super(error, message, statusCode);
+    Error.captureStackTrace(this, AirtableStackError);
+  }
+
+  static fromAirtableError(error: Airtable.Error) {
+    return new AirtableStackError(error.error, error.message, error.statusCode);
+  }
 }
