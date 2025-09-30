@@ -288,7 +288,7 @@ export default async (request: Request, context: Context) => {
     //   subject: 'Error parsing payment email',
     //   text: `Timestamp: ${(new Date()).toString()}`
     // });
-    throw new Error('Couldn't detect payment platform');
+    throw new Error("Couldn't detect payment platform");
   }
 
   const details = extractPaymentDetails(paymentPlatform, email);
@@ -298,7 +298,7 @@ export default async (request: Request, context: Context) => {
   // @ts-ignore FIXME date type incompatible 
   await createFinanceTransaction(Object.assign(details, {
     date, 
-    messageId: parsed.messageId,
+    messageId: message.MessageID,
  }));
 
   return new Response('OK', {
