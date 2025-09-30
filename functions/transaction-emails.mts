@@ -254,8 +254,8 @@ export default async (request: Request, context: Context) => {
   assertInboundMessage(message);
 
   const email: Email = {
-    to: message.To,
-    from: message.From,
+    to: message.ToFull[0].Email ?? message.To,
+    from: message.FromFull[0].Email ?? message.From,
     subject: message.Subject,
     html: message.HtmlBody || message.TextBody || '',
     text: message.TextBody || '',
