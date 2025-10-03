@@ -3,6 +3,7 @@ import type { Models } from 'postmark';
 import _ from 'lodash';
 
 import AirtableBase from '../lib/airtable.mjs';
+import { WebClient } from '@slack/web-api';
 
 type InboundMessageDetails = Models.InboundMessageDetails;
 type InboundRecipient = Models.InboundRecipient;
@@ -239,6 +240,27 @@ const extractPaymentDetails = (platform: string, email: Email) => {
   return details;
 };
 
+async function sendErrorToSlack(email: Email) {
+  try {
+    const slackClient = new WebClient(Netlify.env.get('SLACK_API_TOKEN'));
+    await slackClient.chat.postMessage({
+      channel: Netlify.env.get('SLACK_DEBUG_CHANNEL')!,
+      text: `Error parsing payment email from ${email.from} with subject "${email.subject}" (${(new Date()).toString()})`,
+      blocks: [
+        {type: 'section', text: {
+          type: "mrkdwn", 
+          text: `Error parsing payment email from ${email.from} with subject "${email.subject}"`
+        }},
+        {type: 'context', elements: [
+          {type: 'plain_text', text: (new Date()).toString()}
+        ]},
+      ]
+    });
+  } catch (error) {
+    console.log("Error forwarding to Slack", error);
+  }
+}
+
 const INBOUND_FIELDS = ['From', 'FromName', 'FromFull', 'To', 'ToFull', 'Cc', 'CcFull', 'Bcc', 'BccFull', 'ReplyTo', 'OriginalRecipient', 'Subject', 'Date', 'MailboxHash', 'MessageID', 'Attachments', 'MessageStream', 'TextBody', 'HtmlBody', 'StrippedTextReply', 'Headers']; // prettier-ignore
 function assertInboundMessage(
   body: InboundMessageDetails
@@ -280,14 +302,8 @@ export default async (request: Request, context: Context) => {
 
   const paymentPlatform = detectPaymentPlatform(email, { isAutoForwarded });
   if (!paymentPlatform) {
-    // todo error
     console.error(message);
-    // await sendgridMail.send({
-    //   from: 'finance-script@em9481.mail.bedstuystrong.com',
-    //   to: FUND_EMAIL_ADDRESS,
-    //   subject: 'Error parsing payment email',
-    //   text: `Timestamp: ${(new Date()).toString()}`
-    // });
+    await sendErrorToSlack(email);
     throw new Error("Couldn't detect payment platform");
   }
 
