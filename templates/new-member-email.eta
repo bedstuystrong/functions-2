@@ -1,6 +1,6 @@
 <% layout('./email-layout.eta', {
   subject: it.subject,
-  preview: 'We\'re so glad you\'re here. The best way to get started is to read through our New Member Guide.'
+  preview: 'We\'re so glad you\'re here. We\'ve been busy figuring out what the future of Bed-Stuy Strong looks like.'
 }) %>
 
 <article>
@@ -19,7 +19,7 @@
     and on our <a href="https://instagram.com/bedstuystrong">Instagram</a>. 
   </p>
   <p>
-    We hope to have a new onboarding process figured out in early 2025!
+    We hope to have a new onboarding process figured out soon!
   </p>
 
   <h2>
