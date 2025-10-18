@@ -2,13 +2,11 @@ import path from 'node:path';
 import { Context } from '@netlify/functions';
 import { ManagementClient } from 'auth0';
 import { WebClient } from '@slack/web-api';
-import sendgridMail from '@sendgrid/mail';
+import postmark from 'postmark';
 import { Eta } from 'eta';
 import juice from 'juice';
 
 import AirtableBase from '../lib/airtable.mjs';
-
-sendgridMail.setApiKey(Netlify.env.get('SENDGRID_API_KEY')!);
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
@@ -81,15 +79,14 @@ export default async (request: Request, context: Context) => {
         name: member.name,
         subject,
       });
-      await sendgridMail.send({
-        from: {
-          name: 'Bed-Stuy Strong',
-          email: 'community@mail.bedstuystrong.com',
-        },
-        to: member.email,
-        replyTo: 'community@bedstuystrong.com',
-        subject: subject,
-        html: juice(renderedEmail, { removeStyleTags: false }),
+
+      const postmarkClient = new postmark.ServerClient(Netlify.env.get('POSTMARK_SERVER_API_TOKEN')!);
+      await postmarkClient.sendEmail({
+        From: '"Bed-Stuy Strong" <community@bedstuystrong.com>',
+        To: member.email,
+        Subject: subject,
+        HtmlBody: juice(renderedEmail, { removeStyleTags: false }),
+        MessageStream: 'outbound'
       });
     } catch (error) {
       console.log('email error', error, { airtableMemberId });
