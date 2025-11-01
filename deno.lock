@@ -28,6 +28,7 @@
         "npm:eslint@^8.44.0",
         "npm:eta@^3.1.1",
         "npm:fastify@^5.1.0",
+        "npm:hcaptcha@^0.2.0",
         "npm:juice@^9.1.0",
         "npm:lodash@^4.17.21",
         "npm:mailparser@^3.6.5",
