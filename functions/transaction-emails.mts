@@ -283,7 +283,7 @@ export default async (request: Request, context: Context) => {
     text: message.TextBody || '',
   };
 
-  const date = message.Date;
+  const date = new Date(message.Date).toISOString();
   const isAutoForwarded = email.to === FUND_EMAIL_ADDRESS;
 
   if (!isAutoForwarded && email.to !== INBOUND_EMAIL_ADDRESS) {
