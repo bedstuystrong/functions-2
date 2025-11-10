@@ -7,7 +7,7 @@ const HCAPTCHA_SECRET_KEY = Netlify.env.get("HCAPTCHA_SECRET_KEY");
 if (!HCAPTCHA_SECRET_KEY) throw new Error("Missing HCAPTCHA_SECRET_KEY")
 
 const headers = {
-  "Access-Control-Allow-Origin": Netlify.env.get("BSS_WEBSITE_ORIGIN") ?? "https://bedstuystrong.com",
+  "Access-Control-Allow-Origin": Netlify.env.get("BSS_WEBSITE_ORIGIN") ?? "https://www.bedstuystrong.com",
 };
 
 export default async (request: Request, context: Context) => {
