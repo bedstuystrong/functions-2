@@ -101,7 +101,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
   switch (platform) {
     case 'venmo': {
       details.platform = 'Venmo';
-      const fromMatches = email.subject.match(/(?:Fwd:\s)?(.+) paid you (\$[\d.,]+)/);
+      const fromMatches = email.subject.match(/(?:Fwd:\s)?(.+) paid(?: you)? (\$[\d.,]+)/);
       const toMatches = email.subject.match(/You paid (.+) (\$[\d.,]+)/);
       const noteMatches = email.html.match(/<p class="[^"]*transaction-note[^"]*"[^>]*>([^<]*)<\/p>/m);
 
