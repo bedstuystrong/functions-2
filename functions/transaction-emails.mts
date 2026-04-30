@@ -204,32 +204,27 @@ const extractPaymentDetails = (platform: string, email: Email) => {
     }
     case 'cashapp': {
       details.platform = 'Cash App';
-      const fromMatches = email.subject.match(/(?:Fwd:\s)?(.+) sent you (\$[\d.,]+)(?: for (.*))?/);
-      const toMatches = email.subject.match(/You sent (\$[\d.,]+) to (.*)/);
-      const toAcceptedMatches = email.subject.match(/(?:Fwd: )?(.*) just accepted the (\$[\d.,]+) you sent(?: for (.*))/);
+      const fromMatches = email.text.match(/You were sent (\$[\d.,]+) by (.+)\. To view your receipt/);
+      const toMatches = email.text.match(/You paid (.*) (\$[\d.,]+)(?: for (.*))?/);
+      const noteMatches = email.html.match(/>For ([^<]+)<\/td>\n?<\/tr>\n?<\/tbody>\n?<\/table>\n?<\/td>\n?<\/tr><!-- Receipt Amount -->/);
 
       if (fromMatches) {
         details.direction = 'In';
-        details.name = fromMatches[1];
-        details.amount = fromMatches[2];
-        details.note = fromMatches[3];
+        details.name = fromMatches[2];
+        details.amount = fromMatches[1];
+
+        if (noteMatches) {
+          details.note = noteMatches[1]
+        }
       } else if (toMatches) {
         details.direction = 'Out';
-        details.amount = '-' + toMatches[1];
-
-        const split = toMatches[2].split(/ for (.+)/);
-        if (split.length > 1) {
-          details.name = split[0];
-          details.note = split[1];
-        } else {
-          details.name = split[0];
+        details.amount = '-' + toMatches[2];
+        details.name = toMatches[1];
+        
+        if (toMatches[3]){
+          details.note = toMatches[3];
         }
-      } else if (toAcceptedMatches) {
-        details.direction = 'Out';
-        details.name = toAcceptedMatches[1];
-        details.amount = '-' + toAcceptedMatches[2];
-        details.note = toAcceptedMatches[3];
-      }
+      } 
 
       break;
     }
