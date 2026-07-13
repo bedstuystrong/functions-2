@@ -206,7 +206,7 @@ const extractPaymentDetails = (platform: string, email: Email) => {
       details.platform = 'Cash App';
       const fromMatches = email.text.match(/You were sent (\$[\d.,]+) by (.+)\. To view your receipt/);
       const toMatches = email.text.match(/You paid (.*) (\$[\d.,]+)(?: for (.*))?/);
-      const noteMatches = email.html.match(/>For ([^<]+)<\/td>\n?<\/tr>\n?<\/tbody>\n?<\/table>\n?<\/td>\n?<\/tr><!-- Receipt Amount -->/);
+      const noteMatches = email.html.match(/>For ([^<]+)<\/td>\s*<\/tr>\s*<\/tbody>\s*<\/table>\s*<\/td>\s*<\/tr><!-- Receipt Amount -->/);
 
       if (fromMatches) {
         details.direction = 'In';
